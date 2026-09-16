@@ -3,3 +3,5 @@ dist
 .env
 .yarn/install-state.gz
 .pnp.*
+.vercel
+.env*
