@@ -1,7 +1,6 @@
 import express from 'express'
 import morgan from 'morgan'
 import cors from 'cors'
-import swaggerUi from 'swagger-ui-express'
 import swaggerSpec from './config/swagger'
 
 import authRouter from './routes/auth'
@@ -24,7 +23,33 @@ app.use('/api', userRouter)
 app.use('/api', adminRouter)
 app.use('/api', stripeRouter)
 
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
+app.get('/api-docs.json', (_req, res) => {
+  res.setHeader('Content-Type', 'application/json')
+  res.send(swaggerSpec)
+})
+
+app.get('/api-docs', (_req, res) => {
+  res.setHeader('Content-Type', 'text/html')
+  res.send(`<!DOCTYPE html>
+<html>
+  <head>
+    <title>E-Com API Docs</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css" />
+  </head>
+  <body>
+    <div id="swagger-ui"></div>
+    <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+    <script>
+      window.onload = () => {
+        window.ui = SwaggerUIBundle({
+          url: '/api-docs.json',
+          dom_id: '#swagger-ui'
+        })
+      }
+    </script>
+  </body>
+</html>`)
+})
 
 const PORT = process.env.PORT || 5001
 
