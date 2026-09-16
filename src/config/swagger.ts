@@ -1,6 +1,5 @@
 import swaggerJsdoc from 'swagger-jsdoc'
-
-const PORT = process.env.PORT || 5001
+import path from 'path'
 
 const options: swaggerJsdoc.Options = {
   definition: {
@@ -12,7 +11,7 @@ const options: swaggerJsdoc.Options = {
     },
     servers: [
       {
-        url: `http://localhost:${PORT}/api`
+        url: '/api'
       }
     ],
     components: {
@@ -25,7 +24,7 @@ const options: swaggerJsdoc.Options = {
       }
     }
   },
-  apis: ['./src/routes/*.ts']
+  apis: [path.join(__dirname, '../routes/*.ts'), path.join(__dirname, '../routes/*.js')]
 }
 
 const swaggerSpec = swaggerJsdoc(options)
