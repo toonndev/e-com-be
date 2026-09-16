@@ -18,17 +18,15 @@ export const changeOrderStatus = async (req: Request, res: Response) => {
 
     const orderUpdate = await prisma.$transaction(async (tx) => {
       if (isCancelling) {
-        await Promise.all(
-          existingOrder.products.map((item) =>
-            tx.product.update({
-              where: { id: item.productId },
-              data: {
-                quantity: { increment: item.count },
-                sold: { decrement: item.count }
-              }
-            })
-          )
-        )
+        for (const item of existingOrder.products) {
+          await tx.product.update({
+            where: { id: item.productId },
+            data: {
+              quantity: { increment: item.count },
+              sold: { decrement: item.count }
+            }
+          })
+        }
       }
 
       return tx.order.update({
