@@ -4,9 +4,37 @@ import prisma from '../config/prisma'
 export const changeOrderStatus = async (req: Request, res: Response) => {
   try {
     const { orderId, orderStatus } = req.body
-    const orderUpdate = await prisma.order.update({
+
+    const existingOrder = await prisma.order.findUnique({
       where: { id: orderId },
-      data: { orderStatus: orderStatus }
+      include: { products: true }
+    })
+
+    if (!existingOrder) {
+      return res.status(400).json({ message: 'Order not found' })
+    }
+
+    const isCancelling = orderStatus === 'Cancelled' && existingOrder.orderStatus !== 'Cancelled'
+
+    const orderUpdate = await prisma.$transaction(async (tx) => {
+      if (isCancelling) {
+        await Promise.all(
+          existingOrder.products.map((item) =>
+            tx.product.update({
+              where: { id: item.productId },
+              data: {
+                quantity: { increment: item.count },
+                sold: { decrement: item.count }
+              }
+            })
+          )
+        )
+      }
+
+      return tx.order.update({
+        where: { id: orderId },
+        data: { orderStatus: orderStatus }
+      })
     })
 
     res.json(orderUpdate)
