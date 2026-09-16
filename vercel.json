@@ -1,6 +1,5 @@
 {
   "version": 2,
-  "name": "e-com-be",
   "builds": [
     {
       "src": "src/server.ts",
